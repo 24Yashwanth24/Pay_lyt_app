@@ -31,16 +31,15 @@ class PaytmQRScannerState extends State<PaytmQRScanner> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            gradient: LinearGradient(
+              colors: [Colors.deepPurple, Colors.purpleAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: Color.fromRGBO(
-                  128,
-                  128,
-                  128,
-                  0.3,
-                ), // RGB with alpha (opacity)
+                color: Colors.black.withOpacity(0.2),
                 spreadRadius: 3,
                 blurRadius: 5,
               ),
@@ -51,22 +50,24 @@ class PaytmQRScannerState extends State<PaytmQRScanner> {
             children: [
               const Text(
                 'Place QR Code within the frame',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(height: 12),
-              Container(
-                width: 300,
-                height: 300,
-                decoration: BoxDecoration(
+              AspectRatio(
+                aspectRatio: 1,
+                child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.deepPurple, width: 2),
+                  child: QRView(key: qrKey, onQRViewCreated: _onQRViewCreated),
                 ),
-                child: QRView(key: qrKey, onQRViewCreated: _onQRViewCreated),
               ),
               const SizedBox(height: 20),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
                     vertical: 12,
@@ -75,10 +76,13 @@ class PaytmQRScannerState extends State<PaytmQRScanner> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                icon: const Icon(Icons.qr_code_scanner, color: Colors.white),
+                icon: const Icon(
+                  Icons.qr_code_scanner,
+                  color: Colors.deepPurple,
+                ),
                 label: const Text(
                   'Scan Again',
-                  style: TextStyle(fontSize: 16, color: Colors.white),
+                  style: TextStyle(fontSize: 16, color: Colors.deepPurple),
                 ),
                 onPressed: () => controller?.resumeCamera(),
               ),
@@ -123,160 +127,185 @@ void showPaymentAmountDialog(BuildContext context, String name, String upiId) {
   showDialog(
     context: context,
     builder: (BuildContext context) {
-      return AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-        titlePadding: EdgeInsets.zero,
-        title: Container(
+      return Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        insetPadding: EdgeInsets.all(10), // Ensures full-screen fit
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.95, // Fits screen width
+          height:
+              MediaQuery.of(context).size.height * 0.85, // Fits screen height
+          padding: EdgeInsets.all(16),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.deepPurple, Colors.blueAccent],
+              colors: [Colors.indigo, Colors.cyan],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-          ),
-          padding: EdgeInsets.symmetric(vertical: 18, horizontal: 20),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.payment, color: Colors.white, size: 26),
-              SizedBox(width: 10),
-              Text(
-                'Enter Payment Amount',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                spreadRadius: 3,
+                blurRadius: 5,
               ),
             ],
           ),
-        ),
-        content: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.grey[100],
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 6,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.person, color: Colors.deepPurple, size: 20),
-                        SizedBox(width: 10),
-                        Text(
-                          'Recipient: ',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(name, style: TextStyle(fontSize: 16)),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.account_balance_wallet,
-                          color: Colors.blueAccent,
-                          size: 20,
-                        ),
-                        SizedBox(width: 10),
-                        Text(
-                          'UPI ID: ',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Expanded(
-                          child: Text(upiId, style: TextStyle(fontSize: 16)),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 12),
-              TextField(
-                controller: amountController,
-                decoration: InputDecoration(
-                  labelText: 'Enter Amount',
-                  hintText: '₹ 1000',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  filled: true,
-                  fillColor: Colors.grey[200],
-                  prefixIcon: Icon(
-                    Icons.currency_rupee,
-                    color: Colors.deepPurple,
-                  ),
-                ),
-                style: TextStyle(fontSize: 18),
-                keyboardType: TextInputType.number,
-              ),
-            ],
-          ),
-        ),
-        actionsPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        actions: [
-          TextButton(
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-            ),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepPurple,
-              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: Row(
+          child: SingleChildScrollView(
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.arrow_forward_ios, color: Colors.white, size: 18),
-                SizedBox(width: 6),
-                Text(
-                  'Proceed to Pay',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.payment, color: Colors.indigo, size: 22),
+                      SizedBox(width: 8),
+                      Text(
+                        'Enter Payment Amount',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.indigo,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 10),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    color: Colors.white.withOpacity(0.9),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 6,
+                        spreadRadius: 2,
+                      ),
+                    ],
+                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.person, color: Colors.indigo, size: 18),
+                          SizedBox(width: 8),
+                          Text(
+                            'Recipient: ',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.black,
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              name,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.account_balance_wallet,
+                            color: Colors.cyan,
+                            size: 18,
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'UPI ID: ',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.black,
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(
+                              upiId,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 10),
+                TextField(
+                  controller: amountController,
+                  decoration: InputDecoration(
+                    labelText: 'Enter Amount',
+                    hintText: '₹ 1000',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                    prefixIcon: Icon(
+                      Icons.currency_rupee,
+                      color: Colors.indigo,
+                    ),
+                  ),
+                  style: TextStyle(fontSize: 16, color: Colors.black),
+                  keyboardType: TextInputType.number,
+                ),
+                SizedBox(height: 14),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(color: Colors.red, fontSize: 14),
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.indigo,
+                        padding: EdgeInsets.symmetric(
+                          vertical: 10,
+                          horizontal: 16,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      icon: Icon(
+                        Icons.arrow_forward_ios,
+                        color: Colors.white,
+                        size: 16,
+                      ),
+                      label: Text(
+                        'Proceed to Pay',
+                        style: TextStyle(fontSize: 14, color: Colors.white),
+                      ),
+                      onPressed: () {
+                        openUPIPayment(upiId, amountController.text);
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
-            onPressed: () {
-              openUPIPayment(upiId, amountController.text);
-            },
           ),
-        ],
+        ),
       );
     },
   );
