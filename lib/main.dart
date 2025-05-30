@@ -1,42 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:ussd_launcher/ussd_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:ussd_launcher/ussd_launcher.dart';
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:android_intent_plus/flag.dart';
+import 'dart:ui';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        primaryColor: Colors.indigo,
-        scaffoldBackgroundColor: Colors.white,
-        appBarTheme: AppBarTheme(backgroundColor: Colors.indigo),
+      title: 'Pay to UPI ID',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData.dark().copyWith(
+        textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
       ),
-      home: OfflinePaymentScreen(),
+      home: const VibrantPaymentScreen(),
     );
   }
 }
 
-class OfflinePaymentScreen extends StatefulWidget {
-  const OfflinePaymentScreen({super.key});
-
+class VibrantPaymentScreen extends StatefulWidget {
+  const VibrantPaymentScreen({super.key});
   @override
-  _OfflinePaymentScreenState createState() => _OfflinePaymentScreenState();
+  State<VibrantPaymentScreen> createState() => _VibrantPaymentScreenState();
 }
 
-class _OfflinePaymentScreenState extends State<OfflinePaymentScreen> {
-  final TextEditingController upiIdController = TextEditingController();
-  final TextEditingController amountController = TextEditingController();
-  final TextEditingController remarkController = TextEditingController();
-  final TextEditingController upiPinController = TextEditingController();
+class _VibrantPaymentScreenState extends State<VibrantPaymentScreen> {
+  final upiIdController = TextEditingController();
+  final amountController = TextEditingController();
+  final remarkController = TextEditingController();
+  final upiPinController = TextEditingController();
 
-  List<String> paymentMessages = [];
   bool isLoading = false;
+  List<String> paymentMessages = [];
   int? selectedSimSlot;
 
   @override
@@ -45,9 +47,9 @@ class _OfflinePaymentScreenState extends State<OfflinePaymentScreen> {
     _loadSimCards();
     _showAccessibilityPopup();
     UssdLauncher.setUssdMessageListener((String message) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Payment Message Received: $message")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("USSD Response: $message")));
       setState(() {
         paymentMessages.add(message);
       });
@@ -56,25 +58,28 @@ class _OfflinePaymentScreenState extends State<OfflinePaymentScreen> {
 
   Future<void> _loadSimCards() async {
     var status = await Permission.phone.status;
-    if (status.isGranted) {
-      final simCards = await UssdLauncher.getSimCards();
-      setState(() {
-        if (simCards.isNotEmpty) {
-          selectedSimSlot = simCards[0]['slotIndex'];
-        }
-      });
-    }
+    if (!status.isGranted) await Permission.phone.request();
+
+    final simCards = await UssdLauncher.getSimCards();
+    setState(() {
+      if (simCards.isNotEmpty) {
+        selectedSimSlot = simCards[0]['slotIndex'];
+      }
+    });
   }
 
   void _showAccessibilityPopup() {
-    Future.delayed(Duration(milliseconds: 500), () {
+    Future.delayed(const Duration(milliseconds: 800), () {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text("Enable Accessibility Mode"),
-          content: Text(
-            "To complete transactions, enable Accessibility Mode:\n\n"
-            "1. Open **Settings**\n2. Go to **Accessibility**\n3. Select **Installed Services**\n4. Enable **Offline Payment App**",
+          title: const Text("Enable Accessibility Mode"),
+          content: const Text(
+            "To complete transactions:\n\n"
+            "1. Open Settings\n"
+            "2. Go to Accessibility\n"
+            "3. Tap Installed Services\n"
+            "4. Enable Offline Payment App",
           ),
           actions: [
             TextButton(
@@ -82,7 +87,7 @@ class _OfflinePaymentScreenState extends State<OfflinePaymentScreen> {
                 Navigator.pop(context);
                 _redirectToAccessibilitySettings();
               },
-              child: Text("OK"),
+              child: const Text("Open Settings"),
             ),
           ],
         ),
@@ -98,16 +103,16 @@ class _OfflinePaymentScreenState extends State<OfflinePaymentScreen> {
     intent.launch();
   }
 
-  void startPaymentTransaction() async {
-    String upiID = upiIdController.text;
-    String amount = amountController.text;
-    String remark = remarkController.text;
-    String upiPin = upiPinController.text;
+  void _startPayment() async {
+    final upi = upiIdController.text;
+    final amount = amountController.text;
+    final remark = remarkController.text;
+    final pin = upiPinController.text;
 
-    if (upiID.isEmpty || amount.isEmpty || remark.isEmpty || upiPin.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: All fields must be filled.")),
-      );
+    if ([upi, amount, remark, pin].any((e) => e.isEmpty)) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Please fill all fields")));
       return;
     }
 
@@ -120,15 +125,15 @@ class _OfflinePaymentScreenState extends State<OfflinePaymentScreen> {
       await UssdLauncher.multisessionUssd(
         code: "*99*1*3#",
         slotIndex: selectedSimSlot ?? 0,
-        options: [upiID, amount, remark, upiPin],
+        options: [upi, amount, remark, pin],
       );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Payment transaction started successfully.")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Transaction initiated")));
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Payment Transaction Error: ${e.toString()}")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Error: ${e.toString()}")));
     } finally {
       setState(() {
         isLoading = false;
@@ -140,116 +145,170 @@ class _OfflinePaymentScreenState extends State<OfflinePaymentScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Offline Payment App")),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.indigo, Colors.blueAccent],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller,
+    IconData icon, {
+    bool isPassword = false,
+    bool isNumber = false,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Colors.white10, Colors.white24],
         ),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                _buildTextField(
-                  upiIdController,
-                  "UPI ID",
-                  Icons.account_balance,
-                ),
-                _buildTextField(
-                  amountController,
-                  "Amount",
-                  Icons.money,
-                  isNumber: true,
-                ),
-                _buildTextField(remarkController, "Remark", Icons.comment),
-                _buildTextField(
-                  upiPinController,
-                  "UPI PIN",
-                  Icons.lock,
-                  isPassword: true,
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onPressed: startPaymentTransaction,
-                  child: Text(
-                    "Pay",
-                    style: TextStyle(fontSize: 18, color: Colors.indigo),
-                  ),
-                ),
-                SizedBox(height: 16),
-                Text(
-                  "Payment Responses:",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.white,
-                  ),
-                ),
-                Container(
-                  constraints: BoxConstraints(maxHeight: 200),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.white),
-                    borderRadius: BorderRadius.circular(12),
-                    color: Colors.blueGrey[100],
-                  ),
-                  padding: EdgeInsets.all(10),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: paymentMessages.map((message) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(vertical: 5),
-                          child: Text(
-                            message,
-                            style: TextStyle(color: Colors.white, fontSize: 14),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.cyanAccent.withOpacity(0.3),
+            blurRadius: 8,
+            spreadRadius: 1,
           ),
+        ],
+      ),
+      child: TextField(
+        controller: controller,
+        obscureText: isPassword,
+        keyboardType: isNumber ? TextInputType.number : TextInputType.text,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: Colors.white70),
+          prefixIcon: Icon(icon, color: Colors.cyanAccent),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+          filled: true,
+          fillColor: Colors.transparent,
         ),
       ),
     );
   }
 
-  Widget _buildTextField(
-    TextEditingController controller,
-    String label,
-    IconData icon, {
-    bool isNumber = false,
-    bool isPassword = false,
-  }) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 10),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          prefixIcon: Icon(icon, color: Colors.white),
-          filled: true,
-          fillColor: Colors.white.withOpacity(0.2),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            colors: [Colors.black, Colors.deepPurple],
+            center: Alignment.topLeft,
+            radius: 1.5,
+          ),
         ),
-        keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-        obscureText: isPassword,
-        style: TextStyle(color: Colors.white),
+        child: SafeArea(
+          child: Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: Colors.white30),
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        const Text(
+                          "💸 Modern UPI Payment",
+                          style: TextStyle(
+                            fontSize: 26,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        _buildTextField(
+                          "UPI ID",
+                          upiIdController,
+                          Icons.account_circle,
+                        ),
+                        _buildTextField(
+                          "Amount",
+                          amountController,
+                          Icons.currency_rupee,
+                          isNumber: true,
+                        ),
+                        _buildTextField(
+                          "Remark",
+                          remarkController,
+                          Icons.message,
+                        ),
+                        _buildTextField(
+                          "UPI PIN",
+                          upiPinController,
+                          Icons.lock,
+                          isPassword: true,
+                        ),
+                        const SizedBox(height: 30),
+                        GestureDetector(
+                          onTap: isLoading ? null : _startPayment,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 16,
+                              horizontal: 60,
+                            ),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Colors.cyanAccent, Colors.blueAccent],
+                              ),
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.cyanAccent.withOpacity(0.4),
+                                  blurRadius: 18,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                            child: isLoading
+                                ? const CircularProgressIndicator(
+                                    color: Colors.black,
+                                  )
+                                : const Text(
+                                    "Send Payment",
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        if (paymentMessages.isNotEmpty)
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Responses:",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white70,
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              ...paymentMessages.map(
+                                (msg) => Text(
+                                  msg,
+                                  style: const TextStyle(color: Colors.white60),
+                                ),
+                              ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
