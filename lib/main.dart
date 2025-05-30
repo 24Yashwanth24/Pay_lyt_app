@@ -1,315 +1,342 @@
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:ussd_launcher/ussd_launcher.dart';
-import 'package:android_intent_plus/android_intent.dart';
-import 'package:android_intent_plus/flag.dart';
-import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const VibrantApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class VibrantApp extends StatelessWidget {
+  const VibrantApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Pay to UPI ID',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark().copyWith(
-        textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
+      title: 'Vibrant Payment',
+      theme: ThemeData(
+        primarySwatch: Colors.deepPurple,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: const VibrantPaymentScreen(),
+      home: const VibrantHomePage(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
 
-class VibrantPaymentScreen extends StatefulWidget {
-  const VibrantPaymentScreen({super.key});
+class VibrantHomePage extends StatelessWidget {
+  const VibrantHomePage({super.key});
+
   @override
-  State<VibrantPaymentScreen> createState() => _VibrantPaymentScreenState();
+  Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
+    // Calculate number of tiles per row based on screen width
+    int crossAxisCount = 2;
+    if (width > 700) {
+      crossAxisCount = 4;
+    } else if (width > 500) {
+      crossAxisCount = 3;
+    }
+
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.deepPurple, Colors.black],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 20),
+
+                // Logo + PayLyt text Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CustomPaint(
+                      size: const Size(40, 40),
+                      painter: PayLytLogoPainter(),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      "PayLyt",
+                      style: GoogleFonts.righteous(
+                        fontSize: 56,
+                        color: Colors.cyanAccent,
+                        letterSpacing: 2,
+                        shadows: const [
+                          Shadow(
+                            blurRadius: 14.0,
+                            color: Colors.blueAccent,
+                            offset: Offset(2, 2),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 8),
+
+                // Welcome widget at bottom of title
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Text(
+                    "Welcome",
+                    style: GoogleFonts.dancingScript(
+                      fontSize: 36,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 28.0),
+                  child: Text(
+                    "Your ultimate digital companion for instant, secure, and vibrant money transfers.",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: Colors.white70,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 40),
+
+                Text(
+                  "Choose Payment Mode",
+                  style: GoogleFonts.poppins(
+                    fontSize: 28,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return GridView.count(
+                        physics: const NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        crossAxisCount: crossAxisCount,
+                        crossAxisSpacing: 20,
+                        mainAxisSpacing: 20,
+                        childAspectRatio: 1,
+                        children: [
+                          _buildTwinkleTile(
+                            title: 'To UPI ID',
+                            icon: Icons.alternate_email,
+                            color: Colors.cyan,
+                            onTap: () {},
+                          ),
+                          _buildTwinkleTile(
+                            title: 'To Mobile',
+                            icon: Icons.phone_android,
+                            color: Colors.pinkAccent,
+                            onTap: () {},
+                          ),
+                          _buildTwinkleTile(
+                            title: 'To Bank A/C',
+                            icon: Icons.account_balance,
+                            color: Colors.amber,
+                            onTap: () {},
+                          ),
+                          _buildTwinkleTile(
+                            title: 'Scan QR',
+                            icon: Icons.qr_code_scanner,
+                            color: Colors.greenAccent,
+                            onTap: () {},
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+
+                const SizedBox(height: 50),
+
+                Text(
+                  "Secure. Instant. Vibrant.",
+                  style: GoogleFonts.robotoMono(
+                    color: Colors.white70,
+                    fontStyle: FontStyle.italic,
+                    fontSize: 14,
+                  ),
+                ),
+
+                const SizedBox(height: 50),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTwinkleTile({
+    required String title,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: TwinkleGlowBox(
+        color: color,
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [color.withOpacity(0.3), color.withOpacity(0.85)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 56, color: Colors.white),
+                const SizedBox(height: 14),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.montserrat(
+                    fontSize: 20,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    shadows: const [
+                      Shadow(
+                        blurRadius: 8,
+                        color: Colors.black45,
+                        offset: Offset(1, 1),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class _VibrantPaymentScreenState extends State<VibrantPaymentScreen> {
-  final upiIdController = TextEditingController();
-  final amountController = TextEditingController();
-  final remarkController = TextEditingController();
-  final upiPinController = TextEditingController();
+// Widget that creates twinkling glow effect by animating a soft colored shadow flicker
+class TwinkleGlowBox extends StatefulWidget {
+  final Widget child;
+  final Color color;
 
-  bool isLoading = false;
-  List<String> paymentMessages = [];
-  int? selectedSimSlot;
+  const TwinkleGlowBox({Key? key, required this.child, required this.color})
+    : super(key: key);
+
+  @override
+  State<TwinkleGlowBox> createState() => _TwinkleGlowBoxState();
+}
+
+class _TwinkleGlowBoxState extends State<TwinkleGlowBox>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _glowAnim;
 
   @override
   void initState() {
     super.initState();
-    _loadSimCards();
-    _showAccessibilityPopup();
-    UssdLauncher.setUssdMessageListener((String message) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("USSD Response: $message")));
-      setState(() {
-        paymentMessages.add(message);
-      });
-    });
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat(reverse: true);
+
+    _glowAnim = Tween<double>(
+      begin: 0.6,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
-  Future<void> _loadSimCards() async {
-    var status = await Permission.phone.status;
-    if (!status.isGranted) await Permission.phone.request();
-
-    final simCards = await UssdLauncher.getSimCards();
-    setState(() {
-      if (simCards.isNotEmpty) {
-        selectedSimSlot = simCards[0]['slotIndex'];
-      }
-    });
-  }
-
-  void _showAccessibilityPopup() {
-    Future.delayed(const Duration(milliseconds: 800), () {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Enable Accessibility Mode"),
-          content: const Text(
-            "To complete transactions:\n\n"
-            "1. Open Settings\n"
-            "2. Go to Accessibility\n"
-            "3. Tap Installed Services\n"
-            "4. Enable Offline Payment App",
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _redirectToAccessibilitySettings();
-              },
-              child: const Text("Open Settings"),
-            ),
-          ],
-        ),
-      );
-    });
-  }
-
-  void _redirectToAccessibilitySettings() {
-    final intent = AndroidIntent(
-      action: 'android.settings.ACCESSIBILITY_SETTINGS',
-      flags: <int>[Flag.FLAG_ACTIVITY_NEW_TASK],
-    );
-    intent.launch();
-  }
-
-  void _startPayment() async {
-    final upi = upiIdController.text;
-    final amount = amountController.text;
-    final remark = remarkController.text;
-    final pin = upiPinController.text;
-
-    if ([upi, amount, remark, pin].any((e) => e.isEmpty)) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Please fill all fields")));
-      return;
-    }
-
-    setState(() {
-      isLoading = true;
-      paymentMessages.clear();
-    });
-
-    try {
-      await UssdLauncher.multisessionUssd(
-        code: "*99*1*3#",
-        slotIndex: selectedSimSlot ?? 0,
-        options: [upi, amount, remark, pin],
-      );
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Transaction initiated")));
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Error: ${e.toString()}")));
-    } finally {
-      setState(() {
-        isLoading = false;
-        upiIdController.clear();
-        amountController.clear();
-        remarkController.clear();
-        upiPinController.clear();
-      });
-    }
-  }
-
-  Widget _buildTextField(
-    String label,
-    TextEditingController controller,
-    IconData icon, {
-    bool isPassword = false,
-    bool isNumber = false,
-  }) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Colors.white10, Colors.white24],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.cyanAccent.withOpacity(0.3),
-            blurRadius: 8,
-            spreadRadius: 1,
-          ),
-        ],
-      ),
-      child: TextField(
-        controller: controller,
-        obscureText: isPassword,
-        keyboardType: isNumber ? TextInputType.number : TextInputType.text,
-        style: const TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(color: Colors.white70),
-          prefixIcon: Icon(icon, color: Colors.cyanAccent),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
-          filled: true,
-          fillColor: Colors.transparent,
-        ),
-      ),
-    );
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: RadialGradient(
-            colors: [Colors.black, Colors.deepPurple],
-            center: Alignment.topLeft,
-            radius: 1.5,
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(30),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-                child: Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.all(20),
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: Colors.white30),
-                  ),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: [
-                        const Text(
-                          "💸 Modern UPI Payment",
-                          style: TextStyle(
-                            fontSize: 26,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        _buildTextField(
-                          "UPI ID",
-                          upiIdController,
-                          Icons.account_circle,
-                        ),
-                        _buildTextField(
-                          "Amount",
-                          amountController,
-                          Icons.currency_rupee,
-                          isNumber: true,
-                        ),
-                        _buildTextField(
-                          "Remark",
-                          remarkController,
-                          Icons.message,
-                        ),
-                        _buildTextField(
-                          "UPI PIN",
-                          upiPinController,
-                          Icons.lock,
-                          isPassword: true,
-                        ),
-                        const SizedBox(height: 30),
-                        GestureDetector(
-                          onTap: isLoading ? null : _startPayment,
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 16,
-                              horizontal: 60,
-                            ),
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Colors.cyanAccent, Colors.blueAccent],
-                              ),
-                              borderRadius: BorderRadius.circular(30),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.cyanAccent.withOpacity(0.4),
-                                  blurRadius: 18,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                            ),
-                            child: isLoading
-                                ? const CircularProgressIndicator(
-                                    color: Colors.black,
-                                  )
-                                : const Text(
-                                    "Send Payment",
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        if (paymentMessages.isNotEmpty)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                "Responses:",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.white70,
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                              ...paymentMessages.map(
-                                (msg) => Text(
-                                  msg,
-                                  style: const TextStyle(color: Colors.white60),
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
+    return AnimatedBuilder(
+      animation: _glowAnim,
+      builder: (context, child) {
+        double glowStrength = _glowAnim.value;
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: widget.color.withOpacity(0.7 * glowStrength),
+                blurRadius: 24 * glowStrength,
+                spreadRadius: 8 * glowStrength,
               ),
-            ),
+              BoxShadow(
+                color: Colors.white.withOpacity(0.15 * glowStrength),
+                blurRadius: 12 * glowStrength,
+                spreadRadius: 3 * glowStrength,
+                offset: const Offset(-2, -2),
+              ),
+            ],
           ),
-        ),
-      ),
+          child: widget.child,
+        );
+      },
     );
   }
+}
+
+// Simple custom logo painter (replace with your own logo if you want)
+class PayLytLogoPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..shader = LinearGradient(
+        colors: [Colors.cyanAccent, Colors.blueAccent],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+
+    // Draw a stylized "P" shape logo as example
+    path.moveTo(size.width * 0.2, size.height * 0.1);
+    path.lineTo(size.width * 0.6, size.height * 0.1);
+    path.arcToPoint(
+      Offset(size.width * 0.6, size.height * 0.5),
+      radius: Radius.circular(size.width * 0.3),
+      clockwise: false,
+    );
+    path.lineTo(size.width * 0.2, size.height * 0.5);
+    path.close();
+
+    path.moveTo(size.width * 0.3, size.height * 0.5);
+    path.lineTo(size.width * 0.6, size.height * 0.9);
+    path.lineTo(size.width * 0.2, size.height * 0.9);
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
