@@ -6,21 +6,15 @@ import 'package:android_intent_plus/flag.dart';
 import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
 
-void main() {
-  runApp(const ToUpiId());
-}
-
 class ToUpiId extends StatelessWidget {
   const ToUpiId({super.key});
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Pay to UPI ID',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark().copyWith(
+    return Theme(
+      data: ThemeData.dark().copyWith(
         textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
       ),
-      home: const VibrantPaymentScreen(),
+      child: const VibrantPaymentScreen(),
     );
   }
 }
@@ -70,28 +64,30 @@ class _VibrantPaymentScreenState extends State<VibrantPaymentScreen> {
 
   void _showAccessibilityPopup() {
     Future.delayed(const Duration(milliseconds: 800), () {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Enable Accessibility Mode"),
-          content: const Text(
-            "To complete transactions:\n\n"
-            "1. Open Settings\n"
-            "2. Go to Accessibility\n"
-            "3. Tap Installed Services\n"
-            "4. Enable Offline Payment App",
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                _redirectToAccessibilitySettings();
-              },
-              child: const Text("Open Settings"),
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Enable Accessibility Mode"),
+            content: const Text(
+              "To complete transactions:\n\n"
+              "1. Open Settings\n"
+              "2. Go to Accessibility\n"
+              "3. Tap Installed Services\n"
+              "4. Enable Offline Payment App",
             ),
-          ],
-        ),
-      );
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  _redirectToAccessibilitySettings();
+                },
+                child: const Text("Open Settings"),
+              ),
+            ],
+          ),
+        );
+      }
     });
   }
 
@@ -187,6 +183,15 @@ class _VibrantPaymentScreenState extends State<VibrantPaymentScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.cyanAccent),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      extendBodyBehindAppBar: true,
       body: Container(
         decoration: const BoxDecoration(
           gradient: RadialGradient(

@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hope/to_mobile.dart';
+import 'to_qrcode.dart';
+import 'to_upi_id.dart';
+import 'payment_sucess.dart';
 
 void main() {
-  runApp(const VibrantApp());
+  runApp(const MyApp());
 }
 
-class VibrantApp extends StatelessWidget {
-  const VibrantApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Vibrant Payment',
+      title: 'PayLyt',
       theme: ThemeData(
         primarySwatch: Colors.deepPurple,
         visualDensity: VisualDensity.adaptivePlatformDensity,
@@ -28,8 +32,6 @@ class VibrantHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-
-    // Calculate number of tiles per row based on screen width
     int crossAxisCount = 2;
     if (width > 700) {
       crossAxisCount = 4;
@@ -51,54 +53,64 @@ class VibrantHomePage extends StatelessWidget {
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 20),
-
-                // Logo + PayLyt text Row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CustomPaint(
-                      size: const Size(40, 40),
-                      painter: PayLytLogoPainter(),
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      "PayLyt",
-                      style: GoogleFonts.righteous(
-                        fontSize: 56,
-                        color: Colors.cyanAccent,
-                        letterSpacing: 2,
-                        shadows: const [
-                          Shadow(
-                            blurRadius: 14.0,
-                            color: Colors.blueAccent,
-                            offset: Offset(2, 2),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 8),
-
-                // Welcome widget at bottom of title
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: Text(
-                    "Welcome",
-                    style: GoogleFonts.dancingScript(
-                      fontSize: 36,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      CustomPaint(
+                        size: const Size(40, 40),
+                        painter: PayLytLogoPainter(),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ShaderMask(
+                          shaderCallback: (bounds) => const LinearGradient(
+                            colors: [Colors.cyanAccent, Colors.lightBlueAccent],
+                          ).createShader(bounds),
+                          child: Text(
+                            "PayLyt",
+                            style: GoogleFonts.righteous(
+                              fontSize: 48,
+                              color: Colors.white,
+                              letterSpacing: 2,
+                              shadows: const [
+                                Shadow(
+                                  blurRadius: 12,
+                                  color: Colors.cyanAccent,
+                                  offset: Offset(2, 2),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.notifications_none),
+                        color: Colors.white,
+                        iconSize: 30,
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("No new notifications"),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ),
-
                 const SizedBox(height: 12),
-
+                Text(
+                  "Welcome",
+                  style: GoogleFonts.dancingScript(
+                    fontSize: 36,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 12),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 28.0),
                   child: Text(
@@ -110,9 +122,7 @@ class VibrantHomePage extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 40),
-
                 Text(
                   "Choose Payment Mode",
                   style: GoogleFonts.poppins(
@@ -121,9 +131,7 @@ class VibrantHomePage extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-
                 const SizedBox(height: 24),
-
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: LayoutBuilder(
@@ -140,34 +148,64 @@ class VibrantHomePage extends StatelessWidget {
                             title: 'To UPI ID',
                             icon: Icons.alternate_email,
                             color: Colors.cyan,
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute<void>(
+                                  builder: (BuildContext context) =>
+                                      const ToUpiId(),
+                                ),
+                              );
+                            },
                           ),
                           _buildTwinkleTile(
                             title: 'To Mobile',
                             icon: Icons.phone_android,
                             color: Colors.pinkAccent,
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute<void>(
+                                  builder: (BuildContext context) =>
+                                      const ToMobile(),
+                                ),
+                              );
+                            },
                           ),
                           _buildTwinkleTile(
                             title: 'To Bank A/C',
                             icon: Icons.account_balance,
                             color: Colors.amber,
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute<void>(
+                                  builder: (BuildContext context) =>
+                                      const PaymentSuccessPage(),
+                                ),
+                              );
+                            },
                           ),
                           _buildTwinkleTile(
                             title: 'Scan QR',
                             icon: Icons.qr_code_scanner,
                             color: Colors.greenAccent,
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute<void>(
+                                  builder: (BuildContext context) =>
+                                      const ToQrcode(),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       );
                     },
                   ),
                 ),
-
                 const SizedBox(height: 50),
-
                 Text(
                   "Secure. Instant. Vibrant.",
                   style: GoogleFonts.robotoMono(
@@ -176,7 +214,6 @@ class VibrantHomePage extends StatelessWidget {
                     fontSize: 14,
                   ),
                 ),
-
                 const SizedBox(height: 50),
               ],
             ),
@@ -236,13 +273,11 @@ class VibrantHomePage extends StatelessWidget {
   }
 }
 
-// Widget that creates twinkling glow effect by animating a soft colored shadow flicker
 class TwinkleGlowBox extends StatefulWidget {
   final Widget child;
   final Color color;
 
-  const TwinkleGlowBox({Key? key, required this.child, required this.color})
-    : super(key: key);
+  const TwinkleGlowBox({super.key, required this.child, required this.color});
 
   @override
   State<TwinkleGlowBox> createState() => _TwinkleGlowBoxState();
@@ -256,7 +291,6 @@ class _TwinkleGlowBoxState extends State<TwinkleGlowBox>
   @override
   void initState() {
     super.initState();
-
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
@@ -304,7 +338,6 @@ class _TwinkleGlowBoxState extends State<TwinkleGlowBox>
   }
 }
 
-// Simple custom logo painter (replace with your own logo if you want)
 class PayLytLogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -317,8 +350,6 @@ class PayLytLogoPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     final path = Path();
-
-    // Draw a stylized "P" shape logo as example
     path.moveTo(size.width * 0.2, size.height * 0.1);
     path.lineTo(size.width * 0.6, size.height * 0.1);
     path.arcToPoint(

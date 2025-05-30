@@ -4,22 +4,16 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:ussd_launcher/ussd_launcher.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-void main() {
-  runApp(const VibrantQRPaymentApp());
-}
-
-class VibrantQRPaymentApp extends StatelessWidget {
-  const VibrantQRPaymentApp({super.key});
+class ToQrcode extends StatelessWidget {
+  const ToQrcode({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Vibrant QR Payment',
-      theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
-        textTheme: GoogleFonts.latoTextTheme(Theme.of(context).textTheme),
+    return Theme(
+      data: ThemeData.dark().copyWith(
+        textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
       ),
-      home: const VibrantQRPaymentScreen(),
+      child: const VibrantQRPaymentScreen(),
     );
   }
 }
@@ -111,9 +105,11 @@ class _VibrantQRPaymentScreenState extends State<VibrantQRPaymentScreen> {
           scanned = false;
           await controller?.resumeCamera();
         } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Invalid QR code or error: $e")),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Invalid QR code or error: $e")),
+            );
+          }
           scanned = false;
           await controller?.resumeCamera();
         }
@@ -242,13 +238,17 @@ class _VibrantQRPaymentScreenState extends State<VibrantQRPaymentScreen> {
         slotIndex: selectedSimSlot ?? 0,
         options: [upi, amount, remark, pin],
       );
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text("Transaction initiated")));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Transaction Started")));
+      }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: $e")));
+      }
     } finally {
       setState(() {
         isLoading = false;
@@ -260,8 +260,12 @@ class _VibrantQRPaymentScreenState extends State<VibrantQRPaymentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Pay via QR Scan"),
         backgroundColor: Colors.deepPurple,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text("Pay via QR Scan"),
       ),
       body: Stack(
         children: [
