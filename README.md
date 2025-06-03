@@ -1,27 +1,37 @@
-# PayLyt 
+# **PayLyt - Offline Payment App** 💳  
 
-An Offline Payment App made with the package [ussd_launcher](https://pub.dev/packages/ussd_launcher)
- 
-[Download APK](https://github.com/24Yashwanth24/Pay_lyt_app/raw/ussd/app-release.apk)
+A **secure**, **fast**, and **offline payment solution** built using the [ussd_launcher](https://pub.dev/packages/ussd_launcher) package.  
 
-## Support & Maintenance 🚀
+📱 **Designed for seamless transactions without internet connectivity!**  
 
-Building and maintaining this project takes time, effort, and resources. If you find it valuable, consider supporting me via **UPI**. Your contributions will help keep this project **alive, updated, and growing**! 😊
+[📥 Download APK](https://github.com/24Yashwanth24/Pay_lyt_app/raw/ussd/app-release.apk)  
 
-🔗 **Donate via UPI** – Scan the QR code or use the UPI ID below:
+## **🔹 Features & Technologies**  
+- ✅ **USSD-based Payments** – Send money instantly without data usage.  
+- ✅ **Secure Transactions** – Uses **encryption & authentication** to ensure safe payments.  
+- ✅ **Lightweight & Fast** – Optimized for **low-resource mobile devices**.  
+- ✅ **Cross-Platform Support** – Works across Android devices seamlessly.  
+- ✅ **Offline Functionality** – No need for internet access to make payments.  
 
-![Donate via UPI](./assets/payme.jpg)
+### 🛠 **Tech Stack:**  
+- **Flutter & Dart** – Native performance with **cross-platform support**  
+- **USSD Launcher** – Enables secure offline payments  
+- **UPI Integration** – Support for **digital wallets & banking transactions**  
 
-📌 **UPI ID:** `katabatini@ptyes`
+## **📌 Support & Maintenance** 🚀  
+Building and maintaining this project takes time, effort, and resources. If you find it valuable, consider supporting me via **UPI**. Your contributions will help keep this project **alive, updated, and growing**! 😊  
 
+🔗 **Donate via UPI** – Scan the QR code or use the UPI ID below:  
+![Donate via UPI](./assets/payme.jpg)  
+
+📌 **UPI ID:** `katabatini@ptyes`  
 
 💬 Feel free to reach out with ideas, feedback, or just to say hi!  
 
-## 🚀 Contribute & Improve
+## **🚀 Contribute & Improve**  
+We welcome contributions! If you'd like to **suggest changes, fix bugs, or enhance features**, please follow these steps:  
 
-We welcome contributions! If you'd like to **suggest changes, fix bugs, or enhance features**, please follow these steps:
-
-### 🛠 How to Contribute:
+### 🛠 How to Contribute:  
 1️⃣ **Fork this repository**  
 2️⃣ **Create a new branch** – Work on your feature or fix  
 3️⃣ **Submit a Pull Request (PR)** – Explain your changes  
