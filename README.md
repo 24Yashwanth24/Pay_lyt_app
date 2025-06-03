@@ -10,7 +10,7 @@ Building and maintaining this project takes time, effort, and resources. If you 
 
 🔗 **Donate via UPI** – Scan the QR code or use the UPI ID below:
 
-![Donate via UPI](./assets/upi-qrcode.png)
+![Donate via UPI](./assets/payme.jpg)
 
 📌 **UPI ID:** `katabatini@ptyes`
 
