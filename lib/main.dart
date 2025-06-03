@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hope/to_mobile.dart';
+import 'to_mobile.dart';
 import 'to_qrcode.dart';
 import 'to_upi_id.dart';
 import 'payment_sucess.dart';
