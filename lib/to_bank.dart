@@ -6,27 +6,30 @@ import 'package:android_intent_plus/flag.dart';
 import 'dart:ui';
 import 'package:google_fonts/google_fonts.dart';
 
-class ToMobile extends StatelessWidget {
-  const ToMobile({super.key});
+class ToBank extends StatelessWidget {
+  const ToBank({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Theme(
       data: ThemeData.dark().copyWith(
         textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
       ),
-      child: const MobilePaymentScreen(),
+      child: const BankPaymentScreen(),
     );
   }
 }
 
-class MobilePaymentScreen extends StatefulWidget {
-  const MobilePaymentScreen({super.key});
+class BankPaymentScreen extends StatefulWidget {
+  const BankPaymentScreen({super.key});
+
   @override
-  State<MobilePaymentScreen> createState() => _MobilePaymentScreenState();
+  State<BankPaymentScreen> createState() => _BankPaymentScreenState();
 }
 
-class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
-  final mobileController = TextEditingController();
+class _BankPaymentScreenState extends State<BankPaymentScreen> {
+  final accNumberController = TextEditingController();
+  final ifscController = TextEditingController();
   final amountController = TextEditingController();
   final remarkController = TextEditingController();
   final upiPinController = TextEditingController();
@@ -100,18 +103,14 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
   }
 
   void _startPayment() async {
-    final mobile = mobileController.text.trim();
+    final accNo = accNumberController.text.trim();
+    final ifsc = ifscController.text.trim();
     final amount = amountController.text;
     final remark = remarkController.text;
     final pin = upiPinController.text;
 
-    if ([mobile, amount, remark, pin].any((e) => e.isEmpty)) {
+    if ([accNo, ifsc, amount, remark, pin].any((e) => e.isEmpty)) {
       _showError("Please fill all fields.");
-      return;
-    }
-
-    if (!RegExp(r"^[6-9]\d{9}$").hasMatch(mobile)) {
-      _showError("Enter a valid 10-digit mobile number.");
       return;
     }
 
@@ -122,9 +121,9 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
 
     try {
       await UssdLauncher.multisessionUssd(
-        code: "*99*1*3#", // Adjust code as needed for mobile-based transfers
+        code: "*99*1*5#",
         slotIndex: selectedSimSlot ?? 0,
-        options: [mobile, amount, remark, pin],
+        options: [accNo, ifsc, amount, remark, pin],
       );
       _showSuccess("Transaction initiated");
     } catch (e) {
@@ -132,7 +131,8 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
     } finally {
       setState(() {
         isLoading = false;
-        mobileController.clear();
+        accNumberController.clear();
+        ifscController.clear();
         amountController.clear();
         remarkController.clear();
         upiPinController.clear();
@@ -163,12 +163,12 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
       margin: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Colors.white10, Colors.white24],
+          colors: [Color(0xFF004D40), Color(0xFF00E676)],
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.pinkAccent.withOpacity(0.3),
+            color: Colors.greenAccent.withOpacity(0.3),
             blurRadius: 8,
             spreadRadius: 1,
           ),
@@ -182,7 +182,7 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
         decoration: InputDecoration(
           labelText: label,
           labelStyle: const TextStyle(color: Colors.white70),
-          prefixIcon: Icon(icon, color: Colors.pinkAccent),
+          prefixIcon: Icon(icon, color: Colors.greenAccent),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
           filled: true,
           fillColor: Colors.transparent,
@@ -198,7 +198,7 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.cyanAccent),
+          icon: const Icon(Icons.arrow_back, color: Colors.limeAccent),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -206,7 +206,7 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: RadialGradient(
-            colors: [Colors.black, Colors.purple],
+            colors: [Color(0xFF004D40), Color(0xFF00E676)],
             center: Alignment.topRight,
             radius: 1.3,
           ),
@@ -229,13 +229,13 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
                     child: Column(
                       children: [
                         const Icon(
-                          Icons.phone_iphone,
+                          Icons.account_balance,
                           size: 50,
-                          color: Colors.pinkAccent,
+                          color: Colors.greenAccent,
                         ),
                         const SizedBox(height: 10),
                         const Text(
-                          "📱 Pay to Mobile Number",
+                          "🏦 Pay to Bank Account",
                           style: TextStyle(
                             fontSize: 24,
                             color: Colors.white,
@@ -244,10 +244,15 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
                         ),
                         const SizedBox(height: 20),
                         _buildTextField(
-                          "Mobile Number",
-                          mobileController,
-                          Icons.phone,
+                          "Account Number",
+                          accNumberController,
+                          Icons.account_circle,
                           isNumber: true,
+                        ),
+                        _buildTextField(
+                          "IFSC Code",
+                          ifscController,
+                          Icons.code,
                         ),
                         _buildTextField(
                           "Amount",
@@ -277,15 +282,12 @@ class _MobilePaymentScreenState extends State<MobilePaymentScreen> {
                             ),
                             decoration: BoxDecoration(
                               gradient: const LinearGradient(
-                                colors: [
-                                  Colors.pinkAccent,
-                                  Colors.orangeAccent,
-                                ],
+                                colors: [Color(0xFF00C853), Color(0xFF69F0AE)],
                               ),
                               borderRadius: BorderRadius.circular(30),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.pinkAccent.withOpacity(0.5),
+                                  color: Colors.greenAccent.withOpacity(0.5),
                                   blurRadius: 18,
                                   spreadRadius: 2,
                                 ),

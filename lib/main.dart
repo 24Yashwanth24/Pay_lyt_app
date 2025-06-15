@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'to_mobile.dart';
 import 'to_qrcode.dart';
 import 'to_upi_id.dart';
-import 'payment_sucess.dart';
+import 'to_bank.dart';
 
 void main() {
   runApp(const MyApp());
@@ -181,7 +181,7 @@ class VibrantHomePage extends StatelessWidget {
                                 context,
                                 MaterialPageRoute<void>(
                                   builder: (BuildContext context) =>
-                                      const PaymentSuccessPage(),
+                                      const ToBank(),
                                 ),
                               );
                             },
